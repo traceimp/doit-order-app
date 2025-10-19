@@ -2,10 +2,10 @@
   "name": "cozy-coffee-server",
   "version": "1.0.0",
   "description": "COZY 커피 주문 앱 백엔드 서버",
-  "main": "src/app.js",
+  "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node src/app.js",
+    "start": "node index.js",
     "dev": "nodemon src/app.js"
   },
   "dependencies": {
