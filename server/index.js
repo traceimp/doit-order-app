@@ -17,22 +17,11 @@ const app = express()
 const PORT = process.env.PORT || 5000
 
 // 미들웨어 설정
-const allowedOrigins = [
-    'http://localhost:3000',
-    'https://doit-order-app-frontend.onrender.com',
-    process.env.CORS_ORIGIN
-].filter(Boolean)
-
 app.use(cors({
-    origin: function (origin, callback) {
-        // origin이 없거나 허용된 origin 목록에 있으면 허용
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true)
-        } else {
-            callback(new Error('CORS 정책에 의해 차단되었습니다.'))
-        }
-    },
-    credentials: true
+    origin: true, // 모든 origin 허용 (개발/테스트용)
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 }))
 app.use(express.json({ limit: '1mb' }))
 app.use(express.urlencoded({ extended: true }))
@@ -44,6 +33,15 @@ app.get('/', (req, res) => {
         message: 'COZY 커피 주문 앱 API 서버가 실행 중입니다.',
         version: '1.0.0',
         timestamp: new Date().toISOString()
+    })
+})
+
+// 헬스체크 엔드포인트
+app.get('/health', (req, res) => {
+    res.json({
+        status: 'OK',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime()
     })
 })
 
