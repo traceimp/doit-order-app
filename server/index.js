@@ -45,11 +45,22 @@ app.get('/health', (req, res) => {
     })
 })
 
+// API 테스트 엔드포인트
+app.get('/api/test', (req, res) => {
+    res.json({
+        success: true,
+        message: 'API 엔드포인트가 정상적으로 작동합니다.',
+        timestamp: new Date().toISOString()
+    })
+})
+
 // API 라우트
+console.log('🔧 라우트 설정 중...')
 app.use('/api/menus', menuRoutes)
 app.use('/api/orders', orderRoutes)
 app.use('/api/inventory', inventoryRoutes)
 app.use('/api/dashboard', dashboardRoutes)
+console.log('✅ 모든 라우트가 설정되었습니다.')
 
 // 에러 핸들링 미들웨어
 app.use(notFound)
