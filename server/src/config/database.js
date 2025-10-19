@@ -8,6 +8,7 @@ const pool = new Pool({
   database: process.env.DB_NAME || 'cozy_coffee',
   user: process.env.DB_USER || 'mj',
   password: process.env.DB_PASSWORD || 'password',
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
   max: 20, // 최대 연결 수
   idleTimeoutMillis: 30000, // 유휴 연결 타임아웃
   connectionTimeoutMillis: 2000, // 연결 타임아웃
@@ -26,7 +27,7 @@ pool.on('error', (err) => {
 export const initializeDatabase = async () => {
   try {
     const client = await pool.connect()
-    
+
     // 테이블 생성 쿼리
     const createTables = `
       -- menus 테이블
@@ -80,7 +81,7 @@ export const initializeDatabase = async () => {
     `
 
     await client.query(createTables)
-    
+
     // 초기 데이터 삽입
     const insertInitialData = `
       -- 메뉴 초기 데이터
@@ -109,7 +110,7 @@ export const initializeDatabase = async () => {
     `
 
     await client.query(insertInitialData)
-    
+
     client.release()
     console.log('✅ 데이터베이스 초기화가 완료되었습니다.')
   } catch (err) {
