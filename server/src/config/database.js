@@ -82,17 +82,21 @@ export const initializeDatabase = async () => {
 
     await client.query(createTables)
 
+    // 기존 데이터 삭제 (새로운 메뉴로 교체하기 위해)
+    await client.query('DELETE FROM order_items')
+    await client.query('DELETE FROM orders')
+    await client.query('DELETE FROM options')
+    await client.query('DELETE FROM menus')
+
     // 초기 데이터 삽입
     const insertInitialData = `
       -- 메뉴 초기 데이터
       INSERT INTO menus (name, description, price, stock_quantity) VALUES
-      ('아메리카노(ICE)', '시원하고 깔끔한 아이스 아메리카노', 4000, 10),
       ('아메리카노(HOT)', '따뜻하고 진한 핫 아메리카노', 4000, 10),
+      ('아메리카노(ICE)', '시원하고 깔끔한 아이스 아메리카노', 4000, 10),
       ('카페라떼', '부드러운 우유와 에스프레소의 조화', 5000, 10),
       ('카푸치노', '진한 에스프레소와 거품 우유의 완벽한 조화', 5000, 10),
-      ('카라멜 마키아토', '달콤한 카라멜과 에스프레소의 만남', 5500, 10),
       ('바닐라 라떼', '부드러운 바닐라 향이 가득한 라떼', 5500, 10),
-      ('모카', '진한 초콜릿과 에스프레소의 달콤한 조화', 5500, 10),
       ('콜드브루', '12시간 저온 추출로 만든 부드러운 콜드브루', 4500, 10)
       ON CONFLICT DO NOTHING;
 
@@ -103,9 +107,7 @@ export const initializeDatabase = async () => {
       (3, '샷 추가', 500), (3, '시럽 추가', 0),
       (4, '샷 추가', 500), (4, '시럽 추가', 0),
       (5, '샷 추가', 500), (5, '시럽 추가', 0),
-      (6, '샷 추가', 500), (6, '시럽 추가', 0),
-      (7, '샷 추가', 500), (7, '시럽 추가', 0),
-      (8, '샷 추가', 500), (8, '시럽 추가', 0)
+      (6, '샷 추가', 500), (6, '시럽 추가', 0)
       ON CONFLICT DO NOTHING;
     `
 

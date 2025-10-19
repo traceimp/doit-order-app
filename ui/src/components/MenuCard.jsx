@@ -22,13 +22,11 @@ function MenuCard({ menuItem, onAddToCart }) {
 
     const getMenuImage = (menuName) => {
         const imageMap = {
-            '아메리카노(ICE)': 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=300&h=200&fit=crop',
             '아메리카노(HOT)': 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=300&h=200&fit=crop',
+            '아메리카노(ICE)': 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=300&h=200&fit=crop',
             '카페라떼': 'https://images.unsplash.com/photo-1561047029-3000c68339ca?w=300&h=200&fit=crop',
             '카푸치노': 'https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=300&h=200&fit=crop',
-            '카라멜 마키아토': '/images/caffe-latte.jpg',
             '바닐라 라떼': '/images/americano-hot.jpg',
-            '모카': 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=300&h=200&fit=crop',
             '콜드브루': '/images/americano-ice.jpg'
         }
         return imageMap[menuName] || 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=300&h=200&fit=crop'
