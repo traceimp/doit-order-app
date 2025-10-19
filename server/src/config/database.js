@@ -1,0 +1,126 @@
+import pkg from 'pg'
+const { Pool } = pkg
+
+// 데이터베이스 연결 설정
+const pool = new Pool({
+  host: process.env.DB_HOST || 'localhost',
+  port: process.env.DB_PORT || 5432,
+  database: process.env.DB_NAME || 'cozy_coffee',
+  user: process.env.DB_USER || 'mj',
+  password: process.env.DB_PASSWORD || 'password',
+  max: 20, // 최대 연결 수
+  idleTimeoutMillis: 30000, // 유휴 연결 타임아웃
+  connectionTimeoutMillis: 2000, // 연결 타임아웃
+})
+
+// 연결 테스트
+pool.on('connect', () => {
+  console.log('✅ 데이터베이스에 연결되었습니다.')
+})
+
+pool.on('error', (err) => {
+  console.error('❌ 데이터베이스 연결 오류:', err)
+})
+
+// 데이터베이스 초기화 함수
+export const initializeDatabase = async () => {
+  try {
+    const client = await pool.connect()
+    
+    // 테이블 생성 쿼리
+    const createTables = `
+      -- Menus 테이블
+      CREATE TABLE IF NOT EXISTS Menus (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(100) NOT NULL,
+        description TEXT,
+        price INTEGER NOT NULL,
+        image_url VARCHAR(500),
+        stock_quantity INTEGER NOT NULL DEFAULT 0,
+        is_available BOOLEAN NOT NULL DEFAULT true,
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+      );
+
+      -- Options 테이블
+      CREATE TABLE IF NOT EXISTS Options (
+        id SERIAL PRIMARY KEY,
+        menu_id INTEGER NOT NULL REFERENCES Menus(id) ON DELETE CASCADE,
+        name VARCHAR(100) NOT NULL,
+        price INTEGER NOT NULL DEFAULT 0,
+        is_available BOOLEAN NOT NULL DEFAULT true,
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+      );
+
+      -- Orders 테이블
+      CREATE TABLE IF NOT EXISTS Orders (
+        id SERIAL PRIMARY KEY,
+        order_number VARCHAR(20) NOT NULL UNIQUE,
+        total_amount INTEGER NOT NULL,
+        status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'preparing', 'completed', 'cancelled')),
+        order_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        completed_at TIMESTAMP,
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+      );
+
+      -- Order_Items 테이블
+      CREATE TABLE IF NOT EXISTS Order_Items (
+        id SERIAL PRIMARY KEY,
+        order_id INTEGER NOT NULL REFERENCES Orders(id) ON DELETE CASCADE,
+        menu_id INTEGER NOT NULL REFERENCES Menus(id),
+        menu_name VARCHAR(100) NOT NULL,
+        quantity INTEGER NOT NULL DEFAULT 1,
+        unit_price INTEGER NOT NULL,
+        options JSONB,
+        total_price INTEGER NOT NULL,
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+      );
+
+      -- 인덱스 생성
+      CREATE INDEX IF NOT EXISTS idx_orders_status ON Orders(status);
+      CREATE INDEX IF NOT EXISTS idx_orders_date ON Orders(order_date);
+      CREATE INDEX IF NOT EXISTS idx_order_items_order_id ON Order_Items(order_id);
+      CREATE INDEX IF NOT EXISTS idx_menus_available ON Menus(is_available);
+    `
+
+    await client.query(createTables)
+    
+    // 초기 데이터 삽입
+    const insertInitialData = `
+      -- 메뉴 초기 데이터
+      INSERT INTO Menus (name, description, price, stock_quantity) VALUES
+      ('아메리카노(ICE)', '시원하고 깔끔한 아이스 아메리카노', 4000, 10),
+      ('아메리카노(HOT)', '따뜻하고 진한 핫 아메리카노', 4000, 10),
+      ('카페라떼', '부드러운 우유와 에스프레소의 조화', 5000, 10),
+      ('카푸치노', '진한 에스프레소와 거품 우유의 완벽한 조화', 5000, 10),
+      ('카라멜 마키아토', '달콤한 카라멜과 에스프레소의 만남', 5500, 10),
+      ('바닐라 라떼', '부드러운 바닐라 향이 가득한 라떼', 5500, 10),
+      ('모카', '진한 초콜릿과 에스프레소의 달콤한 조화', 5500, 10),
+      ('콜드브루', '12시간 저온 추출로 만든 부드러운 콜드브루', 4500, 10)
+      ON CONFLICT DO NOTHING;
+
+      -- 옵션 초기 데이터
+      INSERT INTO Options (menu_id, name, price) VALUES
+      (1, '샷 추가', 500), (1, '시럽 추가', 0),
+      (2, '샷 추가', 500), (2, '시럽 추가', 0),
+      (3, '샷 추가', 500), (3, '시럽 추가', 0),
+      (4, '샷 추가', 500), (4, '시럽 추가', 0),
+      (5, '샷 추가', 500), (5, '시럽 추가', 0),
+      (6, '샷 추가', 500), (6, '시럽 추가', 0),
+      (7, '샷 추가', 500), (7, '시럽 추가', 0),
+      (8, '샷 추가', 500), (8, '시럽 추가', 0)
+      ON CONFLICT DO NOTHING;
+    `
+
+    await client.query(insertInitialData)
+    
+    client.release()
+    console.log('✅ 데이터베이스 초기화가 완료되었습니다.')
+  } catch (err) {
+    console.error('❌ 데이터베이스 초기화 오류:', err)
+    throw err
+  }
+}
+
+export default pool

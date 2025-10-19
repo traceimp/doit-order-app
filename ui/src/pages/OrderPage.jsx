@@ -1,70 +1,32 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 import MenuCard from '../components/MenuCard'
 import Cart from '../components/Cart'
+import { api } from '../utils/api'
 import './OrderPage.css'
 
 function OrderPage({ onOrderComplete }) {
     const [cartItems, setCartItems] = useState([])
+    const [menuItems, setMenuItems] = useState([])
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState(null)
 
-    // 메뉴 데이터 (나중에 API에서 가져올 예정)
-    const menuItems = [
-        {
-            id: 1,
-            name: '아메리카노(ICE)',
-            price: 4000,
-            description: '시원하고 깔끔한 아이스 아메리카노',
-            image: null
-        },
-        {
-            id: 2,
-            name: '아메리카노(HOT)',
-            price: 4000,
-            description: '따뜻하고 진한 핫 아메리카노',
-            image: null
-        },
-        {
-            id: 3,
-            name: '카페라떼',
-            price: 5000,
-            description: '부드러운 우유와 에스프레소의 조화',
-            image: null
-        },
-        {
-            id: 4,
-            name: '카푸치노',
-            price: 5000,
-            description: '진한 에스프레소와 거품 우유의 완벽한 조화',
-            image: null
-        },
-        {
-            id: 5,
-            name: '카라멜 마키아토',
-            price: 5500,
-            description: '달콤한 카라멜과 에스프레소의 만남',
-            image: null
-        },
-        {
-            id: 6,
-            name: '바닐라 라떼',
-            price: 5500,
-            description: '부드러운 바닐라 향이 가득한 라떼',
-            image: null
-        },
-        {
-            id: 7,
-            name: '모카',
-            price: 5500,
-            description: '진한 초콜릿과 에스프레소의 달콤한 조화',
-            image: null
-        },
-        {
-            id: 8,
-            name: '콜드브루',
-            price: 4500,
-            description: '12시간 저온 추출로 만든 부드러운 콜드브루',
-            image: null
+    // API에서 메뉴 데이터 가져오기
+    useEffect(() => {
+        const fetchMenus = async () => {
+            try {
+                setLoading(true)
+                const response = await api.getMenus()
+                setMenuItems(response.data)
+            } catch (err) {
+                setError(err.message)
+                console.error('메뉴 로딩 오류:', err)
+            } finally {
+                setLoading(false)
+            }
         }
-    ]
+
+        fetchMenus()
+    }, [])
 
     const addToCart = useCallback((menuItem, options) => {
         const cartItem = {
@@ -122,7 +84,7 @@ function OrderPage({ onOrderComplete }) {
         return item.price + (item.options.extraShot ? 500 : 0)
     }
 
-    const handleOrder = () => {
+    const handleOrder = async () => {
         if (cartItems.length === 0) {
             alert('장바구니가 비어있습니다.')
             return
@@ -135,24 +97,57 @@ function OrderPage({ onOrderComplete }) {
 
         const confirmMessage = `총 ${totalAmount.toLocaleString()}원을 결제하시겠습니까?`
         if (window.confirm(confirmMessage)) {
-            alert('주문이 완료되었습니다!')
+            try {
+                const orderData = {
+                    items: cartItems.map(item => ({
+                        menu_id: item.menuId,
+                        quantity: item.quantity,
+                        options: item.options,
+                        price: getItemPrice(item)
+                    })),
+                    total_amount: totalAmount
+                }
 
-            // 주문 데이터를 관리자 페이지로 전달
-            const orderData = {
-                items: cartItems.map(item => ({
-                    name: getItemDisplayName(item),
-                    quantity: item.quantity,
-                    price: getItemPrice(item)
-                })),
-                total: totalAmount
+                const response = await api.createOrder(orderData)
+
+                const orderResult = {
+                    id: response.data.id,
+                    items: cartItems.map(item => ({
+                        name: getItemDisplayName(item),
+                        quantity: item.quantity,
+                        price: getItemPrice(item)
+                    })),
+                    total: totalAmount,
+                    timestamp: response.data.created_at
+                }
+
+                if (onOrderComplete) {
+                    onOrderComplete(orderResult)
+                }
+
+                setCartItems([])
+                alert('주문이 완료되었습니다!')
+            } catch (err) {
+                console.error('주문 오류:', err)
+                alert('주문 처리 중 오류가 발생했습니다.')
             }
-
-            if (onOrderComplete) {
-                onOrderComplete(orderData)
-            }
-
-            setCartItems([])
         }
+    }
+
+    if (loading) {
+        return (
+            <div className="order-page">
+                <div className="loading">메뉴를 불러오는 중...</div>
+            </div>
+        )
+    }
+
+    if (error) {
+        return (
+            <div className="order-page">
+                <div className="error">오류: {error}</div>
+            </div>
+        )
     }
 
     return (
