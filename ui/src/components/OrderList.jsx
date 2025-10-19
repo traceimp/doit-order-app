@@ -1,0 +1,79 @@
+import React from 'react'
+import './OrderList.css'
+
+function OrderList({ orders, onUpdateOrderStatus }) {
+    const getStatusButton = (order) => {
+        switch (order.status) {
+            case 'pending':
+                return (
+                    <button
+                        className="status-btn pending"
+                        onClick={() => onUpdateOrderStatus(order.id, 'preparing')}
+                    >
+                        주문 접수
+                    </button>
+                )
+            case 'preparing':
+                return (
+                    <button
+                        className="status-btn preparing"
+                        onClick={() => onUpdateOrderStatus(order.id, 'completed')}
+                    >
+                        제조 시작
+                    </button>
+                )
+            case 'completed':
+                return (
+                    <span className="status-completed">제조 완료</span>
+                )
+            default:
+                return null
+        }
+    }
+
+    const getStatusText = (status) => {
+        switch (status) {
+            case 'pending': return '대기 중'
+            case 'preparing': return '제조 중'
+            case 'completed': return '완료'
+            default: return '알 수 없음'
+        }
+    }
+
+    return (
+        <div className="order-list">
+            <h3 className="order-list-title">주문 현황</h3>
+            {orders.length === 0 ? (
+                <div className="empty-orders">
+                    주문이 없습니다.
+                </div>
+            ) : (
+                <div className="orders">
+                    {orders.map(order => (
+                        <div key={order.id} className="order-item">
+                            <div className="order-info">
+                                <div className="order-time">{order.time}</div>
+                                <div className="order-items">
+                                    {order.items.map((item, index) => (
+                                        <div key={index} className="order-item-detail">
+                                            {item.name} x {item.quantity}
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="order-total">{order.total.toLocaleString()}원</div>
+                            </div>
+                            <div className="order-actions">
+                                <div className="order-status">
+                                    상태: {getStatusText(order.status)}
+                                </div>
+                                {getStatusButton(order)}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    )
+}
+
+export default OrderList

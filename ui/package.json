@@ -1,0 +1,27 @@
+{
+  "name": "cozy-coffee-ui",
+  "version": "1.0.0",
+  "description": "COZY 커피 주문 앱 프런트엔드",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [
+    "react",
+    "vite",
+    "coffee",
+    "order"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^5.0.4",
+    "vite": "^7.1.10"
+  }
+}

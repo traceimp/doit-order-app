@@ -1,0 +1,11 @@
+.admin-page {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+@media (max-width: 768px) {
+    .admin-page {
+        gap: 15px;
+    }
+}

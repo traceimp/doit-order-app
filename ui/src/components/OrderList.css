@@ -1,0 +1,136 @@
+.order-list {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.order-list-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    margin: 0 0 15px 0;
+}
+
+.empty-orders {
+    text-align: center;
+    color: #666;
+    font-size: 14px;
+    padding: 40px 0;
+}
+
+.orders {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.order-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.order-item:hover {
+    background-color: #e9ecef;
+}
+
+.order-info {
+    flex: 1;
+}
+
+.order-time {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.order-items {
+    margin-bottom: 5px;
+}
+
+.order-item-detail {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 2px;
+}
+
+.order-total {
+    font-size: 14px;
+    font-weight: 600;
+    color: #e74c3c;
+}
+
+.order-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+}
+
+.order-status {
+    font-size: 12px;
+    color: #666;
+}
+
+.status-btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.status-btn.pending {
+    background-color: #2563eb;
+    color: white;
+}
+
+.status-btn.pending:hover {
+    background-color: #1d4ed8;
+}
+
+.status-btn.preparing {
+    background-color: #2563eb;
+    color: white;
+}
+
+.status-btn.preparing:hover {
+    background-color: #1d4ed8;
+}
+
+.status-completed {
+    font-size: 12px;
+    color: #27ae60;
+    font-weight: 600;
+    padding: 6px 12px;
+    background-color: #d5f4e6;
+    border-radius: 4px;
+}
+
+@media (max-width: 768px) {
+    .order-list {
+        padding: 15px;
+    }
+
+    .order-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .order-actions {
+        width: 100%;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+}
