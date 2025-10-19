@@ -17,8 +17,21 @@ const app = express()
 const PORT = process.env.PORT || 5000
 
 // 미들웨어 설정
+const allowedOrigins = [
+    'http://localhost:3000',
+    'https://doit-order-app-frontend.onrender.com',
+    process.env.CORS_ORIGIN
+].filter(Boolean)
+
 app.use(cors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+    origin: function (origin, callback) {
+        // origin이 없거나 허용된 origin 목록에 있으면 허용
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true)
+        } else {
+            callback(new Error('CORS 정책에 의해 차단되었습니다.'))
+        }
+    },
     credentials: true
 }))
 app.use(express.json({ limit: '1mb' }))

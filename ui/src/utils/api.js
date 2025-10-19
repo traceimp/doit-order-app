@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://your-backend-url.onrender.com/api'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://doit-order-app.onrender.com/api'
 
 export const api = {
     // 메뉴 관련 API
