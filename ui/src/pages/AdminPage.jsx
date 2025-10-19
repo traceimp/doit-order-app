@@ -12,13 +12,30 @@ function AdminPage() {
             items: [{ name: '아메리카노(ICE)', quantity: 1, price: 4000 }],
             total: 4000,
             status: 'pending'
+        },
+        {
+            id: 2,
+            time: '7월 31일 12:45',
+            items: [
+                { name: '카페라떼', quantity: 2, price: 5000 },
+                { name: '바닐라 라떼', quantity: 1, price: 5500 }
+            ],
+            total: 15500,
+            status: 'preparing'
+        },
+        {
+            id: 3,
+            time: '7월 31일 12:30',
+            items: [{ name: '카푸치노', quantity: 1, price: 5000 }],
+            total: 5000,
+            status: 'completed'
         }
     ])
 
     const [inventory, setInventory] = useState({
-        1: 10, // 아메리카노(ICE)
-        2: 10, // 아메리카노(HOT)
-        3: 10  // 카페라떼
+        1: 3,  // 아메리카노(ICE) - 주의 상태
+        2: 0,  // 아메리카노(HOT) - 품절 상태
+        3: 8   // 카페라떼 - 정상 상태
     })
 
     const updateInventory = (menuId, change) => {

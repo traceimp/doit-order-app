@@ -37,13 +37,43 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
+    gap: 15px;
+}
+
+.stock-quantity-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
 }
 
 .stock-quantity {
     font-size: 18px;
     font-weight: bold;
     color: #333;
+}
+
+.stock-status {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 12px;
+    text-transform: uppercase;
+}
+
+.stock-status.status-normal {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.stock-status.status-warning {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.stock-status.status-out {
+    background-color: #f8d7da;
+    color: #721c24;
 }
 
 .stock-controls {

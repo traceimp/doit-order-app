@@ -40,6 +40,10 @@ function OrderList({ orders, onUpdateOrderStatus }) {
         }
     }
 
+    const formatOrderItems = (items) => {
+        return items.map(item => `${item.name} x ${item.quantity}`).join(', ')
+    }
+
     return (
         <div className="order-list">
             <h3 className="order-list-title">주문 현황</h3>
@@ -54,11 +58,7 @@ function OrderList({ orders, onUpdateOrderStatus }) {
                             <div className="order-info">
                                 <div className="order-time">{order.time}</div>
                                 <div className="order-items">
-                                    {order.items.map((item, index) => (
-                                        <div key={index} className="order-item-detail">
-                                            {item.name} x {item.quantity}
-                                        </div>
-                                    ))}
+                                    {formatOrderItems(order.items)}
                                 </div>
                                 <div className="order-total">{order.total.toLocaleString()}원</div>
                             </div>
