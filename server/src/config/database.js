@@ -88,9 +88,8 @@ export const initializeDatabase = async () => {
     await client.query('DELETE FROM options')
     await client.query('DELETE FROM menus')
 
-    // 초기 데이터 삽입
-    const insertInitialData = `
-      -- 메뉴 초기 데이터
+    // 메뉴 데이터 삽입
+    const insertMenus = `
       INSERT INTO menus (name, description, price, stock_quantity) VALUES
       ('아메리카노(HOT)', '따뜻하고 진한 핫 아메리카노', 4000, 10),
       ('아메리카노(ICE)', '시원하고 깔끔한 아이스 아메리카노', 4000, 10),
@@ -99,19 +98,23 @@ export const initializeDatabase = async () => {
       ('바닐라 라떼', '부드러운 바닐라 향이 가득한 라떼', 5500, 10),
       ('콜드브루', '12시간 저온 추출로 만든 부드러운 콜드브루', 4500, 10)
       ON CONFLICT DO NOTHING;
-
-      -- 옵션 초기 데이터
-      INSERT INTO options (menu_id, name, price) VALUES
-      (1, '샷 추가', 500), (1, '시럽 추가', 0),
-      (2, '샷 추가', 500), (2, '시럽 추가', 0),
-      (3, '샷 추가', 500), (3, '시럽 추가', 0),
-      (4, '샷 추가', 500), (4, '시럽 추가', 0),
-      (5, '샷 추가', 500), (5, '시럽 추가', 0),
-      (6, '샷 추가', 500), (6, '시럽 추가', 0)
-      ON CONFLICT DO NOTHING;
     `
 
-    await client.query(insertInitialData)
+    await client.query(insertMenus)
+
+    // 메뉴 ID 조회
+    const menuResult = await client.query('SELECT id, name FROM menus ORDER BY id')
+    const menus = menuResult.rows
+
+    // 옵션 데이터 삽입 (실제 메뉴 ID 사용)
+    for (const menu of menus) {
+      await client.query(`
+        INSERT INTO options (menu_id, name, price) VALUES
+        ($1, '샷 추가', 500),
+        ($1, '시럽 추가', 0)
+        ON CONFLICT DO NOTHING
+      `, [menu.id])
+    }
 
     client.release()
     console.log('✅ 데이터베이스 초기화가 완료되었습니다.')
