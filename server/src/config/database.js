@@ -29,8 +29,8 @@ export const initializeDatabase = async () => {
     
     // 테이블 생성 쿼리
     const createTables = `
-      -- Menus 테이블
-      CREATE TABLE IF NOT EXISTS Menus (
+      -- menus 테이블
+      CREATE TABLE IF NOT EXISTS menus (
         id SERIAL PRIMARY KEY,
         name VARCHAR(100) NOT NULL,
         description TEXT,
@@ -42,46 +42,41 @@ export const initializeDatabase = async () => {
         updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
       );
 
-      -- Options 테이블
-      CREATE TABLE IF NOT EXISTS Options (
+      -- options 테이블
+      CREATE TABLE IF NOT EXISTS options (
         id SERIAL PRIMARY KEY,
-        menu_id INTEGER NOT NULL REFERENCES Menus(id) ON DELETE CASCADE,
+        menu_id INTEGER NOT NULL REFERENCES menus(id) ON DELETE CASCADE,
         name VARCHAR(100) NOT NULL,
         price INTEGER NOT NULL DEFAULT 0,
         is_available BOOLEAN NOT NULL DEFAULT true,
         created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
       );
 
-      -- Orders 테이블
-      CREATE TABLE IF NOT EXISTS Orders (
+      -- orders 테이블
+      CREATE TABLE IF NOT EXISTS orders (
         id SERIAL PRIMARY KEY,
-        order_number VARCHAR(20) NOT NULL UNIQUE,
         total_amount INTEGER NOT NULL,
         status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'preparing', 'completed', 'cancelled')),
-        order_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        completed_at TIMESTAMP,
         created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
       );
 
-      -- Order_Items 테이블
-      CREATE TABLE IF NOT EXISTS Order_Items (
+      -- order_items 테이블
+      CREATE TABLE IF NOT EXISTS order_items (
         id SERIAL PRIMARY KEY,
-        order_id INTEGER NOT NULL REFERENCES Orders(id) ON DELETE CASCADE,
-        menu_id INTEGER NOT NULL REFERENCES Menus(id),
-        menu_name VARCHAR(100) NOT NULL,
+        order_id INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+        menu_id INTEGER NOT NULL REFERENCES menus(id),
         quantity INTEGER NOT NULL DEFAULT 1,
-        unit_price INTEGER NOT NULL,
         options JSONB,
-        total_price INTEGER NOT NULL,
+        price INTEGER NOT NULL,
         created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
       );
 
       -- 인덱스 생성
-      CREATE INDEX IF NOT EXISTS idx_orders_status ON Orders(status);
-      CREATE INDEX IF NOT EXISTS idx_orders_date ON Orders(order_date);
-      CREATE INDEX IF NOT EXISTS idx_order_items_order_id ON Order_Items(order_id);
-      CREATE INDEX IF NOT EXISTS idx_menus_available ON Menus(is_available);
+      CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
+      CREATE INDEX IF NOT EXISTS idx_orders_date ON orders(created_at);
+      CREATE INDEX IF NOT EXISTS idx_order_items_order_id ON order_items(order_id);
+      CREATE INDEX IF NOT EXISTS idx_menus_available ON menus(is_available);
     `
 
     await client.query(createTables)
@@ -89,7 +84,7 @@ export const initializeDatabase = async () => {
     // 초기 데이터 삽입
     const insertInitialData = `
       -- 메뉴 초기 데이터
-      INSERT INTO Menus (name, description, price, stock_quantity) VALUES
+      INSERT INTO menus (name, description, price, stock_quantity) VALUES
       ('아메리카노(ICE)', '시원하고 깔끔한 아이스 아메리카노', 4000, 10),
       ('아메리카노(HOT)', '따뜻하고 진한 핫 아메리카노', 4000, 10),
       ('카페라떼', '부드러운 우유와 에스프레소의 조화', 5000, 10),
@@ -101,7 +96,7 @@ export const initializeDatabase = async () => {
       ON CONFLICT DO NOTHING;
 
       -- 옵션 초기 데이터
-      INSERT INTO Options (menu_id, name, price) VALUES
+      INSERT INTO options (menu_id, name, price) VALUES
       (1, '샷 추가', 500), (1, '시럽 추가', 0),
       (2, '샷 추가', 500), (2, '시럽 추가', 0),
       (3, '샷 추가', 500), (3, '시럽 추가', 0),
@@ -123,4 +118,5 @@ export const initializeDatabase = async () => {
   }
 }
 
+export { pool }
 export default pool

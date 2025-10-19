@@ -2,73 +2,94 @@ import React, { useState, useEffect } from 'react'
 import Dashboard from '../components/Dashboard'
 import Inventory from '../components/Inventory'
 import OrderList from '../components/OrderList'
+import { api } from '../utils/api'
 import './AdminPage.css'
 
 function AdminPage({ newOrder, onOrderProcessed }) {
-    const [orders, setOrders] = useState([
-        {
-            id: 1,
-            time: '7월 31일 13:00',
-            items: [{ name: '아메리카노(ICE)', quantity: 1, price: 4000 }],
-            total: 4000,
-            status: 'pending'
-        },
-        {
-            id: 2,
-            time: '7월 31일 12:45',
-            items: [
-                { name: '카페라떼', quantity: 2, price: 5000 },
-                { name: '바닐라 라떼', quantity: 1, price: 5500 }
-            ],
-            total: 15500,
-            status: 'preparing'
-        },
-        {
-            id: 3,
-            time: '7월 31일 12:30',
-            items: [{ name: '카푸치노', quantity: 1, price: 5000 }],
-            total: 5000,
-            status: 'completed'
-        }
-    ])
-
-    const [inventory, setInventory] = useState({
-        1: 3,  // 아메리카노(ICE) - 주의 상태
-        2: 0,  // 아메리카노(HOT) - 품절 상태
-        3: 8   // 카페라떼 - 정상 상태
+    const [orders, setOrders] = useState([])
+    const [inventory, setInventory] = useState([])
+    const [dashboardStats, setDashboardStats] = useState({
+        total_orders: 0,
+        pending_orders: 0,
+        preparing_orders: 0,
+        completed_orders: 0
     })
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState(null)
 
-    const updateInventory = (menuId, change) => {
-        setInventory(prev => ({
-            ...prev,
-            [menuId]: Math.max(0, prev[menuId] + change)
-        }))
+    // 데이터 로딩
+    const loadData = async () => {
+        try {
+            setLoading(true)
+            const [ordersResponse, inventoryResponse, statsResponse] = await Promise.all([
+                api.getOrders(),
+                api.getInventory(),
+                api.getDashboardStats()
+            ])
+            
+            setOrders(ordersResponse.data)
+            setInventory(inventoryResponse.data)
+            setDashboardStats(statsResponse.data)
+        } catch (err) {
+            setError(err.message)
+            console.error('데이터 로딩 오류:', err)
+        } finally {
+            setLoading(false)
+        }
     }
 
-    const updateOrderStatus = (orderId, newStatus) => {
-        setOrders(prev =>
-            prev.map(order =>
-                order.id === orderId
-                    ? { ...order, status: newStatus }
-                    : order
+    const updateInventory = async (menuId, change) => {
+        try {
+            const currentItem = inventory.find(item => item.id === menuId)
+            if (!currentItem) return
+            
+            const newQuantity = Math.max(0, currentItem.stock_quantity + change)
+            await api.updateInventory(menuId, newQuantity)
+            
+            // 로컬 상태 업데이트
+            setInventory(prev => 
+                prev.map(item => 
+                    item.id === menuId 
+                        ? { ...item, stock_quantity: newQuantity }
+                        : item
+                )
             )
-        )
+        } catch (err) {
+            console.error('재고 업데이트 오류:', err)
+            alert('재고 업데이트에 실패했습니다.')
+        }
+    }
+
+    const updateOrderStatus = async (orderId, newStatus) => {
+        try {
+            await api.updateOrderStatus(orderId, newStatus)
+            
+            // 로컬 상태 업데이트
+            setOrders(prev =>
+                prev.map(order =>
+                    order.id === orderId
+                        ? { ...order, status: newStatus }
+                        : order
+                )
+            )
+            
+            // 대시보드 통계 업데이트
+            await loadData()
+        } catch (err) {
+            console.error('주문 상태 업데이트 오류:', err)
+            alert('주문 상태 업데이트에 실패했습니다.')
+        }
     }
 
     const addNewOrder = (orderData) => {
-        const newOrder = {
-            id: Date.now(),
-            time: new Date().toLocaleString('ko-KR', {
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            }),
-            ...orderData,
-            status: 'pending'
-        }
-        setOrders(prev => [newOrder, ...prev])
+        // 새 주문은 이미 API를 통해 생성되었으므로 데이터를 다시 로드
+        loadData()
     }
+
+    // 컴포넌트 마운트 시 데이터 로드
+    useEffect(() => {
+        loadData()
+    }, [])
 
     // 새 주문이 들어오면 추가
     useEffect(() => {
@@ -80,18 +101,25 @@ function AdminPage({ newOrder, onOrderProcessed }) {
         }
     }, [newOrder, onOrderProcessed])
 
-    const getOrderStats = () => {
-        const total = orders.length
-        const pending = orders.filter(order => order.status === 'pending').length
-        const preparing = orders.filter(order => order.status === 'preparing').length
-        const completed = orders.filter(order => order.status === 'completed').length
+    if (loading) {
+        return (
+            <div className="admin-page">
+                <div className="loading">데이터를 불러오는 중...</div>
+            </div>
+        )
+    }
 
-        return { total, pending, preparing, completed }
+    if (error) {
+        return (
+            <div className="admin-page">
+                <div className="error">오류: {error}</div>
+            </div>
+        )
     }
 
     return (
         <div className="admin-page">
-            <Dashboard stats={getOrderStats()} />
+            <Dashboard stats={dashboardStats} />
             <Inventory inventory={inventory} onUpdateInventory={updateInventory} />
             <OrderList
                 orders={orders}

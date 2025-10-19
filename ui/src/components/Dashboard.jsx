@@ -5,25 +5,22 @@ function Dashboard({ stats }) {
     return (
         <div className="dashboard">
             <h3 className="dashboard-title">관리자 대시보드</h3>
-            <div className="stats-summary">
-                총 주문 {stats.total} / 주문 접수 {stats.pending} / 제조 중 {stats.preparing} / 제조 완료 {stats.completed}
-            </div>
             <div className="stats-grid">
                 <div className="stat-item">
                     <span className="stat-label">총 주문</span>
-                    <span className="stat-value">{stats.total}</span>
+                    <span className="stat-value">{stats.total_orders}</span>
                 </div>
                 <div className="stat-item">
                     <span className="stat-label">주문 접수</span>
-                    <span className="stat-value">{stats.pending}</span>
+                    <span className="stat-value">{stats.pending_orders}</span>
                 </div>
                 <div className="stat-item">
                     <span className="stat-label">제조 중</span>
-                    <span className="stat-value">{stats.preparing}</span>
+                    <span className="stat-value">{stats.preparing_orders}</span>
                 </div>
                 <div className="stat-item">
                     <span className="stat-label">제조 완료</span>
-                    <span className="stat-value">{stats.completed}</span>
+                    <span className="stat-value">{stats.completed_orders}</span>
                 </div>
             </div>
         </div>

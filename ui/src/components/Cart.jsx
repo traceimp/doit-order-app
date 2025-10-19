@@ -43,32 +43,32 @@ function Cart({ items, onUpdateQuantity, onRemoveItem, onOrder }) {
                                 {items.map(item => (
                                     <div key={item.id} className="cart-item">
                                         <div className="item-info">
-                                            <div className="item-name">
-                                                {getItemDisplayName(item)}
-                                            </div>
-                                            <div className="item-details">
-                                                <div className="item-price">
-                                                    {getItemPrice(item).toLocaleString()}원
+                                            <div className="item-name-section">
+                                                <div className="item-name">
+                                                    {getItemDisplayName(item)}
                                                 </div>
+                                                <div className="quantity-controls">
+                                                    <button
+                                                        className="quantity-btn"
+                                                        onClick={() => onUpdateQuantity(item.id, -1)}
+                                                    >
+                                                        -
+                                                    </button>
+                                                    <span className="quantity">{item.quantity}</span>
+                                                    <button
+                                                        className="quantity-btn"
+                                                        onClick={() => onUpdateQuantity(item.id, 1)}
+                                                    >
+                                                        +
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div className="item-price">
+                                                {getItemPrice(item).toLocaleString()}원
                                             </div>
                                         </div>
 
                                         <div className="item-controls">
-                                            <div className="quantity-controls">
-                                                <button
-                                                    className="quantity-btn"
-                                                    onClick={() => onUpdateQuantity(item.id, -1)}
-                                                >
-                                                    -
-                                                </button>
-                                                <span className="quantity">{item.quantity}</span>
-                                                <button
-                                                    className="quantity-btn"
-                                                    onClick={() => onUpdateQuantity(item.id, 1)}
-                                                >
-                                                    +
-                                                </button>
-                                            </div>
                                             <button
                                                 className="remove-btn"
                                                 onClick={() => onRemoveItem(item.id)}

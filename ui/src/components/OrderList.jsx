@@ -41,7 +41,29 @@ function OrderList({ orders, onUpdateOrderStatus }) {
     }
 
     const formatOrderItems = (items) => {
-        return items.map(item => `${item.name} x ${item.quantity}`).join(', ')
+        if (!items || items.length === 0) return '주문 항목 없음'
+        return items.map(item => {
+            if (!item.options || Object.keys(item.options).length === 0) {
+                return `${item.menu_name} x ${item.quantity}`
+            }
+
+            const optionNames = []
+            if (item.options.extraShot) optionNames.push('샷 추가')
+            if (item.options.syrup) optionNames.push('시럽 추가')
+
+            const optionsText = optionNames.length > 0 ? ` (${optionNames.join(', ')})` : ''
+            return `${item.menu_name}${optionsText} x ${item.quantity}`
+        }).join(', ')
+    }
+
+    const formatOrderTime = (createdAt) => {
+        const date = new Date(createdAt)
+        return date.toLocaleString('ko-KR', {
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        })
     }
 
     return (
@@ -56,11 +78,11 @@ function OrderList({ orders, onUpdateOrderStatus }) {
                     {orders.map(order => (
                         <div key={order.id} className="order-item">
                             <div className="order-info">
-                                <div className="order-time">{order.time}</div>
+                                <div className="order-time">{formatOrderTime(order.created_at)}</div>
                                 <div className="order-items">
                                     {formatOrderItems(order.items)}
                                 </div>
-                                <div className="order-total">{order.total.toLocaleString()}원</div>
+                                <div className="order-total">{order.total_amount.toLocaleString()}원</div>
                             </div>
                             <div className="order-actions">
                                 <div className="order-status">
