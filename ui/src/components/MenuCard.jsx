@@ -47,6 +47,7 @@ function MenuCard({ menuItem, onAddToCart }) {
                             type="checkbox"
                             checked={options.extraShot}
                             onChange={() => handleOptionChange('extraShot')}
+                            aria-label="샷 추가 옵션"
                         />
                         <span>샷 추가 (+500원)</span>
                     </label>
@@ -56,6 +57,7 @@ function MenuCard({ menuItem, onAddToCart }) {
                             type="checkbox"
                             checked={options.syrup}
                             onChange={() => handleOptionChange('syrup')}
+                            aria-label="시럽 추가 옵션"
                         />
                         <span>시럽 추가 (+0원)</span>
                     </label>

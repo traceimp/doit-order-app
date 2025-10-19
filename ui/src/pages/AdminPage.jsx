@@ -1,10 +1,10 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Dashboard from '../components/Dashboard'
 import Inventory from '../components/Inventory'
 import OrderList from '../components/OrderList'
 import './AdminPage.css'
 
-function AdminPage() {
+function AdminPage({ newOrder, onOrderProcessed }) {
     const [orders, setOrders] = useState([
         {
             id: 1,
@@ -54,6 +54,31 @@ function AdminPage() {
             )
         )
     }
+
+    const addNewOrder = (orderData) => {
+        const newOrder = {
+            id: Date.now(),
+            time: new Date().toLocaleString('ko-KR', {
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            }),
+            ...orderData,
+            status: 'pending'
+        }
+        setOrders(prev => [newOrder, ...prev])
+    }
+
+    // 새 주문이 들어오면 추가
+    useEffect(() => {
+        if (newOrder) {
+            addNewOrder(newOrder)
+            if (onOrderProcessed) {
+                onOrderProcessed()
+            }
+        }
+    }, [newOrder, onOrderProcessed])
 
     const getOrderStats = () => {
         const total = orders.length

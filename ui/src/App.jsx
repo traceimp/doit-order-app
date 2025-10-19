@@ -6,15 +6,21 @@ import './styles/App.css'
 
 function App() {
     const [currentPage, setCurrentPage] = useState('order')
+    const [newOrder, setNewOrder] = useState(null)
+
+    const handleOrderComplete = (orderData) => {
+        setNewOrder(orderData)
+        setCurrentPage('admin')
+    }
 
     const renderPage = () => {
         switch (currentPage) {
             case 'order':
-                return <OrderPage />
+                return <OrderPage onOrderComplete={handleOrderComplete} />
             case 'admin':
-                return <AdminPage />
+                return <AdminPage newOrder={newOrder} onOrderProcessed={() => setNewOrder(null)} />
             default:
-                return <OrderPage />
+                return <OrderPage onOrderComplete={handleOrderComplete} />
         }
     }
 

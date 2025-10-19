@@ -1,9 +1,9 @@
-import React, { useState } from 'react'
+import React, { useState, useCallback } from 'react'
 import MenuCard from '../components/MenuCard'
 import Cart from '../components/Cart'
 import './OrderPage.css'
 
-function OrderPage() {
+function OrderPage({ onOrderComplete }) {
     const [cartItems, setCartItems] = useState([])
 
     // 메뉴 데이터 (나중에 API에서 가져올 예정)
@@ -66,7 +66,7 @@ function OrderPage() {
         }
     ]
 
-    const addToCart = (menuItem, options) => {
+    const addToCart = useCallback((menuItem, options) => {
         const cartItem = {
             id: `${menuItem.id}-${JSON.stringify(options)}`,
             menuId: menuItem.id,
@@ -88,7 +88,7 @@ function OrderPage() {
                 return [...prevItems, cartItem]
             }
         })
-    }
+    }, [])
 
     const updateCartItemQuantity = (itemId, change) => {
         setCartItems(prevItems =>
@@ -106,14 +106,53 @@ function OrderPage() {
         setCartItems(prevItems => prevItems.filter(item => item.id !== itemId))
     }
 
+    const getItemDisplayName = (item) => {
+        let name = item.name
+        const options = []
+        if (item.options.extraShot) options.push('샷 추가')
+        if (item.options.syrup) options.push('시럽 추가')
+
+        if (options.length > 0) {
+            name += ` (${options.join(', ')})`
+        }
+        return name
+    }
+
+    const getItemPrice = (item) => {
+        return item.price + (item.options.extraShot ? 500 : 0)
+    }
+
     const handleOrder = () => {
         if (cartItems.length === 0) {
             alert('장바구니가 비어있습니다.')
             return
         }
 
-        alert('주문이 완료되었습니다!')
-        setCartItems([])
+        const totalAmount = cartItems.reduce((total, item) => {
+            const itemPrice = item.price + (item.options.extraShot ? 500 : 0)
+            return total + (itemPrice * item.quantity)
+        }, 0)
+
+        const confirmMessage = `총 ${totalAmount.toLocaleString()}원을 결제하시겠습니까?`
+        if (window.confirm(confirmMessage)) {
+            alert('주문이 완료되었습니다!')
+
+            // 주문 데이터를 관리자 페이지로 전달
+            const orderData = {
+                items: cartItems.map(item => ({
+                    name: getItemDisplayName(item),
+                    quantity: item.quantity,
+                    price: getItemPrice(item)
+                })),
+                total: totalAmount
+            }
+
+            if (onOrderComplete) {
+                onOrderComplete(orderData)
+            }
+
+            setCartItems([])
+        }
     }
 
     return (
